@@ -1,0 +1,14 @@
+portal_inside:
+  material: PURPLE_STAINED_GLASS_PANE
+  model: 12345
+  replacement-block: AIR
+  use-yaw: false
+  use-pitch: false
+  yaw-rotation-round: 90
+  pitch-rotation-round: 0
+  pos-x: 0.5
+  pos-y: 0.5
+  pos-z: 0.5
+  scale-x: 1.0
+  scale-y: 1.0
+  scale-z: 1.0
