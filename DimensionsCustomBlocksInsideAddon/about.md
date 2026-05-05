@@ -1,1 +1,1 @@
-Dimensions addon that hides Dimensions portal-inside visuals and fills the inside area with ACustomBlocks custom blocks.
+Dimensions addon that hides portal-inside visuals and fills the inside area with SopCustomBlocks custom blocks.

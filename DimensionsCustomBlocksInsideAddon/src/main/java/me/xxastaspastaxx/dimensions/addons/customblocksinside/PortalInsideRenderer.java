@@ -16,14 +16,14 @@ import me.xxastaspastaxx.dimensions.completePortal.CompletePortal;
 import me.xxastaspastaxx.dimensions.customportal.CustomPortal;
 import me.xxastaspastaxx.dimensions.events.CustomPortalBreakEvent;
 import me.xxastaspastaxx.dimensions.events.CustomPortalIgniteEvent;
-import net.enelson.astract.customblocks.ACustomBlocks;
-import net.enelson.astract.customblocks.managers.blocks.BlockManager;
-import net.enelson.astract.customblocks.managers.blocks.CustomBlock;
+import net.enelson.sopcustomblocks.SopCustomBlocks;
+import net.enelson.sopcustomblocks.managers.blocks.BlockManager;
+import net.enelson.sopcustomblocks.managers.blocks.CustomBlock;
 
 public class PortalInsideRenderer implements Listener {
 
     private static final String HIDE_PORTAL_INSIDE_TAG = "hidePortalInside";
-    private static final String CONFIG_PATH = "Addon.ACustomBlocksInside";
+    private static final String CONFIG_PATH = "Addon.SopCustomBlocksInside.BlockId";
 
     @EventHandler
     public void onIgnite(CustomPortalIgniteEvent event) {
@@ -37,7 +37,7 @@ public class PortalInsideRenderer implements Listener {
 
         if (!(event.getEntity() instanceof Player player)) return;
 
-        BlockManager blockManager = ACustomBlocks.getInstance().getBlockManager();
+        BlockManager blockManager = SopCustomBlocks.getInstance().getBlockManager();
 
         for (Location location : collectInsideLocations(portal)) {
             CustomBlock existing = blockManager.getBlock(location);
@@ -56,7 +56,7 @@ public class PortalInsideRenderer implements Listener {
         String customBlockId = resolveCustomBlockId(portal);
         if (customBlockId == null || customBlockId.isBlank()) return;
 
-        BlockManager blockManager = ACustomBlocks.getInstance().getBlockManager();
+        BlockManager blockManager = SopCustomBlocks.getInstance().getBlockManager();
 
         for (Location location : collectInsideLocations(portal)) {
             CustomBlock existing = blockManager.getBlock(location);

@@ -2,6 +2,7 @@ package me.xxastaspastaxx.dimensions.addons.customblocksinside;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.Method;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,14 +19,15 @@ import me.xxastaspastaxx.dimensions.completePortal.CompletePortal;
 import me.xxastaspastaxx.dimensions.customportal.CustomPortal;
 import me.xxastaspastaxx.dimensions.events.CustomPortalBreakEvent;
 import me.xxastaspastaxx.dimensions.events.CustomPortalIgniteEvent;
-import net.enelson.astract.customblocks.ACustomBlocks;
-import net.enelson.astract.customblocks.managers.blocks.BlockManager;
-import net.enelson.astract.customblocks.managers.blocks.CustomBlock;
+import me.xxastaspastaxx.dimensions.events.CustomPortalUseEvent;
+import net.enelson.sopcustomblocks.SopCustomBlocks;
+import net.enelson.sopcustomblocks.managers.blocks.BlockManager;
+import net.enelson.sopcustomblocks.managers.blocks.CustomBlock;
 
 public class DimensionsCustomBlocksInsideAddon extends DimensionsAddon implements Listener {
 
     private static final String HIDE_PORTAL_INSIDE_TAG = "hidePortalInside";
-    private static final String OPTION_KEY = "acustomblocksinside.id";
+    private static final String OPTION_KEY = "sopcustomblocksinside.id";
 
     private Dimensions plugin;
 
@@ -33,14 +35,14 @@ public class DimensionsCustomBlocksInsideAddon extends DimensionsAddon implement
         super(
                 "DimensionsCustomBlocksInsideAddon",
                 "1.0.0",
-                "Replaces Dimensions portal inside with ACustomBlocks blocks",
+                "Replaces Dimensions portal inside with SopCustomBlocks blocks",
                 DimensionsAddonPriority.NORMAL
         );
     }
 
     @Override
     public boolean onLoad(Dimensions pl) {
-        return pl.getServer().getPluginManager().getPlugin("ACustomBlocks") != null;
+        return pl.getServer().getPluginManager().getPlugin("SopCustomBlocks") != null;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class DimensionsCustomBlocksInsideAddon extends DimensionsAddon implement
 
     @Override
     public void registerPortal(YamlConfiguration portalConfig, CustomPortal portal) {
-        String customBlockId = portalConfig.getString("Addon.ACustomBlocksInside");
+        String customBlockId = portalConfig.getString("Addon.SopCustomBlocksInside.BlockId");
         if (customBlockId != null) {
             customBlockId = customBlockId.trim();
         }
@@ -88,21 +90,44 @@ public class DimensionsCustomBlocksInsideAddon extends DimensionsAddon implement
 
         portal.setTag(HIDE_PORTAL_INSIDE_TAG, true);
 
-        BlockManager blockManager = ACustomBlocks.getInstance().getBlockManager();
+        BlockManager blockManager = SopCustomBlocks.getInstance().getBlockManager();
         Player player = event.getEntity() instanceof Player ? (Player) event.getEntity() : null;
+        float yaw = resolvePortalYaw(portal);
 
         for (Location location : collectInsideLocations(portal)) {
             CustomBlock existing = blockManager.getBlock(location);
             if (existing != null) {
                 blockManager.breakBlock(existing, null);
             }
-            blockManager.addBlock(customBlockId, location, player);
+            addPortalInsideBlock(blockManager, customBlockId, location, yaw, player);
         }
     }
 
     @EventHandler
     public void onPortalBreak(CustomPortalBreakEvent event) {
         cleanupPortalInside(event.getCompletePortal());
+    }
+
+    @EventHandler
+    public void onPortalUse(CustomPortalUseEvent event) {
+        CompletePortal portal = event.getCompletePortal();
+        if (portal == null) {
+            return;
+        }
+
+        String customBlockId = getCustomBlockId(portal);
+        if (customBlockId == null || customBlockId.isBlank()) {
+            return;
+        }
+
+        BlockManager blockManager = SopCustomBlocks.getInstance().getBlockManager();
+        if (blockManager == null || event.getEntity() == null) {
+            return;
+        }
+
+        if (blockManager.isCustomBlockArmorStand(event.getEntity()) || blockManager.getBlock(event.getEntity()) != null) {
+            event.setCancelled(true);
+        }
     }
 
     private String getCustomBlockId(CompletePortal portal) {
@@ -138,6 +163,25 @@ public class DimensionsCustomBlocksInsideAddon extends DimensionsAddon implement
         return list;
     }
 
+    private float resolvePortalYaw(CompletePortal portal) {
+        if (portal == null || portal.getPortalGeometry() == null) {
+            return 0.0f;
+        }
+
+        return portal.getPortalGeometry().iszAxis() ? -90.0f : 0.0f;
+    }
+
+    private void addPortalInsideBlock(BlockManager blockManager, String customBlockId, Location location, float yaw, Player player) {
+        try {
+            Method method = blockManager.getClass().getMethod("addBlock", String.class, Location.class, float.class, float.class);
+            method.invoke(blockManager, customBlockId, location, yaw, 0.0f);
+            return;
+        } catch (ReflectiveOperationException ignored) {
+            // Fall back to the legacy API when the server still has an older SopCustomBlocks build.
+        }
+        blockManager.addBlock(customBlockId, location, player);
+    }
+
     private void cleanupPortalInside(CompletePortal portal) {
         if (portal == null) {
             return;
@@ -148,7 +192,7 @@ public class DimensionsCustomBlocksInsideAddon extends DimensionsAddon implement
             return;
         }
 
-        BlockManager blockManager = ACustomBlocks.getInstance().getBlockManager();
+        BlockManager blockManager = SopCustomBlocks.getInstance().getBlockManager();
 
         for (Location location : collectInsideLocations(portal)) {
             CustomBlock existing = blockManager.getBlock(location);

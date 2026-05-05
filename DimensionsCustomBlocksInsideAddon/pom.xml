@@ -37,8 +37,8 @@
         </dependency>
 
         <dependency>
-            <groupId>net.enelson.astract.customblocks</groupId>
-            <artifactId>ACustomBlocks</artifactId>
+            <groupId>net.enelson.sopcustomblocks</groupId>
+            <artifactId>SopCustomBlocks</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>

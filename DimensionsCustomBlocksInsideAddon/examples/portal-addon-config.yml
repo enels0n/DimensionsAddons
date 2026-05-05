@@ -1,5 +1,3 @@
 Addon:
-  CustomBlocksInside:
-    Enabled: true
+  SopCustomBlocksInside:
     BlockId: portal_inside
-    RemoveDropsOnBreak: true

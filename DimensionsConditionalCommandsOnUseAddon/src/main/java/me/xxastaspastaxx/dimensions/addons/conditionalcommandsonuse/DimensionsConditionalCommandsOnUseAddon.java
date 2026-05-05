@@ -88,6 +88,7 @@ public final class DimensionsConditionalCommandsOnUseAddon extends DimensionsAdd
             if (action.isCancelUse()) {
                 event.setCancelled(true);
             }
+            return;
         }
     }
 

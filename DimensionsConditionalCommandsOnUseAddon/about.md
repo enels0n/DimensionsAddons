@@ -1,6 +1,8 @@
 # DimensionsConditionalCommandsOnUseAddon
 
 Runs commands when a Dimensions portal is used, but only if configurable conditions match.
+Actions are checked in order. The first matching action is executed, and the addon stops checking the rest.
+If no action matches, nothing happens.
 
 Example portal config:
 
